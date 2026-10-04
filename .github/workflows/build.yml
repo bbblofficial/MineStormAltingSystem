@@ -1,0 +1,62 @@
+name: Build MineStormAltingSystem
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check project layout
+        run: |
+          if [ ! -f src/main/resources/plugin.yml ] || [ ! -d src/main/java/me/minestorm/altingsystem ]; then
+            echo "::error title=Source files missing::The 'src' folder was not uploaded to this repository. Upload the whole 'src' folder (src/main/java/... and src/main/resources/plugin.yml) next to pom.xml."
+            echo "Files currently in the repository:"
+            find . -path ./.git -prune -o -type f -print
+            exit 1
+          fi
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn -B -ntp clean package
+
+      - name: Verify plugin jar
+        run: |
+          JAR=$(ls target/MineStormAltingSystem-*.jar | head -n 1)
+          echo "Built: $JAR"
+          unzip -p "$JAR" plugin.yml | grep -q "main: me.minestorm.altingsystem.MineStormAltingSystemPlugin"
+          unzip -l "$JAR" | grep -q "me/minestorm/altingsystem/MineStormAltingSystemPlugin.class"
+
+      - name: Upload plugin jar (workflow artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: MineStormAltingSystem
+          path: target/MineStormAltingSystem-*.jar
+          if-no-files-found: error
+
+      # Automatically publishes the jar as a GitHub Release on every push to main/master,
+      # so the download is always available under the repository's "Releases" page.
+      - name: Publish GitHub Release
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: MineStormAltingSystem build ${{ github.run_number }}
+          body: Automated build of commit ${{ github.sha }}.
+          files: target/MineStormAltingSystem-*.jar

@@ -1,0 +1,45 @@
+name: MineStormAltingSystem
+version: '${project.version}'
+main: me.minestorm.altingsystem.MineStormAltingSystemPlugin
+api-version: '1.13'
+description: Sensitivity-based alt detection for MineStorm, powered by GrimAC.
+authors: [MineStorm]
+# softdepend guarantees GrimAC loads first, while still letting this plugin start
+# so it can report a missing GrimAC to staff instead of silently failing to load.
+softdepend: [GrimAC]
+
+commands:
+  alt:
+    description: Check a player's sensitivity and suspected alt accounts
+    usage: /alt <player>
+    permission: minestorm.alt
+  altreport:
+    description: List all players sharing the same sensitivity
+    usage: /altreport
+    permission: minestorm.altreport
+  alttoggle:
+    description: Toggle alt alert messages for yourself
+    usage: /alttoggle
+    permission: minestorm.togglealerts
+
+permissions:
+  minestorm.alt:
+    description: Use /alt
+    default: op
+  minestorm.altreport:
+    description: Use /altreport
+    default: op
+  minestorm.togglealerts:
+    description: Use /alttoggle
+    default: op
+  minestorm.alerts:
+    description: Receive automatic alt alerts and system notices
+    default: op
+  minestorm.*:
+    description: All MineStormAltingSystem permissions
+    default: op
+    children:
+      minestorm.alt: true
+      minestorm.altreport: true
+      minestorm.togglealerts: true
+      minestorm.alerts: true
