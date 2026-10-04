@@ -1,0 +1,46 @@
+# ============================================================
+# MineStormAltingSystem — config.yml
+# Created by Muvixo
+# ============================================================
+
+# Shared storage.
+#   type: sqlite  -> single server, local file (database.db)
+#   type: mysql   -> multi-server, shared across all backends
+# With MYSQL the database and tables are created automatically.
+database:
+  type: mysql
+
+  # --- the only four values you must fill in ---
+  host: 127.0.0.1
+  database: minestormalt
+  username: root
+  password: ''
+
+  # --- optional overrides ---
+  port: 3306
+  useSSL: false
+  serverTimezone: UTC
+  poolSize: 10
+
+  # --- used only when type: sqlite ---
+  file: database.db
+
+  # How often each server re-reads the shared DB (seconds).
+  # 0 = disabled. Only meaningful with MySQL.
+  refresh-interval-seconds: 5
+
+# Cross-server relay through the Bungee / Velocity proxy plugin.
+# Requires a proxy jar installed on the proxy. Restart required after change.
+network:
+  proxy: true
+  # Unique name of THIS backend, matching the name used in the proxy config.
+  server-name: server
+  # Long random string, identical on every backend. Packets are HMAC-signed.
+  secret: change-me-to-a-long-random-string
+
+options:
+  # How long to wait after a player joins before checking his sensitivity.
+  # Give GrimAC time to compute it.
+  join-check-delay-seconds: 15
+  # If a player is not on this server, look up his alt list from the shared DB.
+  allow-remote-lookup: true

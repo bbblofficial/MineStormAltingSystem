@@ -1,0 +1,5 @@
+name: MineStormAltingSystem
+version: '1.0.0'
+main: me.minestorm.altingsystem.bungee.MineStormAltingSystemBungee
+author: Muvixo
+description: Cross-server sensitivity relay

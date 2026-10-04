@@ -1,0 +1,49 @@
+name: Build MineStormAltingSystem
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ '17', '21' ]
+    name: Build with JDK ${{ matrix.java }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn -B -ntp clean package
+
+      - name: Verify jars
+        run: |
+          ls -la bukkit/target/MineStormAltingSystem-*.jar
+          ls -la bungee/target/MineStormAltingSystem-*.jar
+          ls -la velocity/target/MineStormAltingSystem-*.jar
+          unzip -p bukkit/target/MineStormAltingSystem-Bukkit-*.jar plugin.yml \
+              | grep -q "main: me.minestorm.altingsystem.MineStormAltingSystemPlugin"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: MineStormAltingSystem-JDK${{ matrix.java }}
+          if-no-files-found: warn
+          path: |
+            bukkit/target/MineStormAltingSystem-*.jar
+            bungee/target/MineStormAltingSystem-*.jar
+            velocity/target/MineStormAltingSystem-*.jar
